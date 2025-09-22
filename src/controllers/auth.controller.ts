@@ -23,7 +23,7 @@ export class AuthController extends BaseController {
           code: error.code,
         });
       } else {
-        this.handleError(res);
+        this.handleError(res, error, 'Failed to register user');
       }
     }
   };
@@ -40,7 +40,7 @@ export class AuthController extends BaseController {
           code: error.code,
         });
       } else {
-        this.handleError(res);
+        this.handleError(res, error, 'Failed to login');
       }
     }
   };

@@ -61,7 +61,7 @@ export class ProductController extends BaseController {
         hasMore: offsetNumber + limitNumber < totalCount,
       });
     } catch (error) {
-      this.handleError(res);
+      this.handleError(res, error, 'Failed to get products');
     }
   };
 
@@ -84,7 +84,7 @@ export class ProductController extends BaseController {
         data: product,
       });
     } catch (error) {
-      this.handleError(res);
+      this.handleError(res, error, 'Failed to get product');
     }
   };
 
@@ -101,7 +101,7 @@ export class ProductController extends BaseController {
         store_id: storeId,
       });
     } catch (error) {
-      this.handleError(res);
+      this.handleError(res, error, 'Failed to get products by store');
     }
   };
 }

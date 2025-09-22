@@ -26,7 +26,7 @@ export class OrderController extends BaseController {
         data: order,
       });
     } catch (error) {
-      this.handleError(res);
+      this.handleError(res, error, 'Failed to create order');
     }
   };
 
@@ -43,7 +43,7 @@ export class OrderController extends BaseController {
         user_id: userId,
       });
     } catch (error) {
-      this.handleError(res);
+      this.handleError(res, error, 'Failed to get orders by user');
     }
   };
 
@@ -66,7 +66,7 @@ export class OrderController extends BaseController {
         data: order,
       });
     } catch (error) {
-      this.handleError(res);
+      this.handleError(res, error, 'Failed to get order');
     }
   };
 }

@@ -53,7 +53,6 @@ describe('StoreService Unit Tests', () => {
   beforeEach(() => {
     storeService = new StoreService();
     jest.clearAllMocks();
-    console.log = jest.fn();
   });
 
   describe('initializeStores', () => {

@@ -5,26 +5,25 @@ import { validate } from '@/middleware/validation.middleware';
 import { RegisterDTOSchema, LoginDTOSchema } from '@/dto/auth.dto';
 import { INVALID_CREDENTIALS, USER_EXISTS } from '@/constants/errors';
 import { AuthController } from '@/controllers/auth.controller';
+import AuthService from '@/services/auth.service';
 
-const mockRegister = jest.fn();
-const mockLogin = jest.fn();
+jest.mock('@/services/auth.service');
 
-class MockAuthService {
-  register = mockRegister;
-  login = mockLogin;
-  constructor() {}
-}
+const mockAuthService = AuthService as jest.MockedClass<typeof AuthService>;
 
 describe('AuthController Unit Tests', () => {
   let app: express.Application;
   let authController: AuthController;
+  let mockServiceInstance: jest.Mocked<AuthService>;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
     app = express();
     app.use(express.json());
 
     authController = new AuthController();
-    (authController as any).authService = new MockAuthService();
+    mockServiceInstance = mockAuthService.mock.instances[0] as jest.Mocked<AuthService>;
 
     app.post('/register', validate(RegisterDTOSchema), authController.register);
     app.post('/login', validate(LoginDTOSchema), authController.login);
@@ -38,12 +37,12 @@ describe('AuthController Unit Tests', () => {
     };
 
     it('should register a user successfully', async () => {
-      mockRegister.mockResolvedValue(undefined);
+      mockServiceInstance.register.mockResolvedValue(undefined);
 
       const response = await request(app).post('/register').send(validRegisterData);
 
       expect(response.status).toBe(201);
-      expect(mockRegister).toHaveBeenCalledWith(validRegisterData);
+      expect(mockServiceInstance.register).toHaveBeenCalledWith(validRegisterData);
     });
 
     it('should return 400 for validation errors', async () => {
@@ -63,7 +62,7 @@ describe('AuthController Unit Tests', () => {
 
     it('should return 409 when user already exists', async () => {
       const authError = new AuthError(USER_EXISTS.code, USER_EXISTS.message, USER_EXISTS.statusCode);
-      mockRegister.mockRejectedValue(authError);
+      mockServiceInstance.register.mockRejectedValue(authError);
 
       const response = await request(app).post('/register').send(validRegisterData).expect(409);
 
@@ -127,7 +126,7 @@ describe('AuthController Unit Tests', () => {
 
     it('should handle generic errors with base controller error handler', async () => {
       const genericError = new Error('Database connection failed');
-      mockRegister.mockRejectedValue(genericError);
+      mockServiceInstance.register.mockRejectedValue(genericError);
 
       const mockHandleError = jest.spyOn(authController, 'handleError' as any);
 
@@ -156,12 +155,12 @@ describe('AuthController Unit Tests', () => {
         },
       };
 
-      mockLogin.mockResolvedValue(mockServiceResponse);
+      mockServiceInstance.login.mockResolvedValue(mockServiceResponse);
 
       const response = await request(app).post('/login').send(validLoginData).expect(200);
 
       expect(response.body).toEqual(mockServiceResponse);
-      expect(mockLogin).toHaveBeenCalledWith(validLoginData);
+      expect(mockServiceInstance.login).toHaveBeenCalledWith(validLoginData);
     });
 
     it('should return 400 for validation errors', async () => {
@@ -183,7 +182,7 @@ describe('AuthController Unit Tests', () => {
         INVALID_CREDENTIALS.message,
         INVALID_CREDENTIALS.statusCode
       );
-      mockLogin.mockRejectedValue(authError);
+      mockServiceInstance.login.mockRejectedValue(authError);
 
       const response = await request(app).post('/login').send(validLoginData).expect(401);
 
@@ -228,7 +227,7 @@ describe('AuthController Unit Tests', () => {
 
     it('should handle generic errors with base controller error handler', async () => {
       const genericError = new Error('Service unavailable');
-      mockLogin.mockRejectedValue(genericError);
+      mockServiceInstance.login.mockRejectedValue(genericError);
 
       const mockHandleError = jest.spyOn(authController, 'handleError' as any);
 
@@ -252,7 +251,7 @@ describe('AuthController Unit Tests', () => {
   describe('Error Handling', () => {
     it('should handle AuthError correctly in register', async () => {
       const customError = new AuthError('CUSTOM_ERROR', 'Custom error message', 422);
-      mockRegister.mockRejectedValue(customError);
+      mockServiceInstance.register.mockRejectedValue(customError);
 
       const response = await request(app)
         .post('/register')
@@ -272,7 +271,7 @@ describe('AuthController Unit Tests', () => {
 
     it('should handle AuthError correctly in login', async () => {
       const customError = new AuthError('CUSTOM_ERROR', 'Custom error message', 422);
-      mockLogin.mockRejectedValue(customError);
+      mockServiceInstance.login.mockRejectedValue(customError);
 
       const response = await request(app)
         .post('/login')
@@ -294,11 +293,11 @@ describe('AuthController Unit Tests', () => {
     it('should apply validation middleware before controller methods', async () => {
       await request(app).post('/register').send({}).expect(400);
 
-      expect(mockRegister).not.toHaveBeenCalled();
+      expect(mockServiceInstance.register).not.toHaveBeenCalled();
     });
 
     it('should process valid requests through validation middleware', async () => {
-      mockRegister.mockResolvedValue(undefined);
+      mockServiceInstance.register.mockResolvedValue(undefined);
 
       await request(app)
         .post('/register')
@@ -309,7 +308,7 @@ describe('AuthController Unit Tests', () => {
         })
         .expect(201);
 
-      expect(mockRegister).toHaveBeenCalled();
+      expect(mockServiceInstance.register).toHaveBeenCalled();
     });
   });
 });

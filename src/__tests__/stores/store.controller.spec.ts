@@ -104,7 +104,7 @@ describe('StoreController Unit Tests', () => {
 
       expect(response.body).toEqual({
         success: false,
-        message: 'Internal server error',
+        message: 'Failed to get stores',
       });
     });
 

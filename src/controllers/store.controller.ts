@@ -23,7 +23,7 @@ export class StoreController extends BaseController {
           code: error.code,
         });
       } else {
-        this.handleError(res);
+        this.handleError(res, error, 'Failed to get stores');
       }
     }
   };
