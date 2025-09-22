@@ -14,7 +14,7 @@ export const validate = (schema: z.ZodSchema) => {
           message: issue.message,
         }));
 
-        res.status(400).json({
+        return res.status(400).json({
           success: false,
           message: 'Validation error',
           errors: errorMessages,
@@ -22,13 +22,13 @@ export const validate = (schema: z.ZodSchema) => {
       }
 
       if (error instanceof Error) {
-        res.status(400).json({
+        return res.status(400).json({
           success: false,
           message: error.message,
         });
       }
 
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: 'Validation error',
       });

@@ -11,6 +11,16 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(appRoutes);
 
-app.listen(config.PORT, () => {
-  console.log(`Server is running on port ${config.PORT} 🚀`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  const server = app.listen(config.PORT, () => {
+    console.log(`Server is running on port ${config.PORT} 🚀`);
+  });
+
+  process.on('SIGTERM', () => {
+    server.close(() => {
+      console.log('Process terminated');
+    });
+  });
+}
+
+export default app;

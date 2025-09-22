@@ -6,7 +6,7 @@ import { AuthError } from '@/errors';
 import { config } from '@/config';
 import type { RegisterDTO, LoginDTO, AuthResponseDTO } from '@/dto/auth.dto';
 import UserRepository from '@/repositories/user.repository';
-import { INVALID_CREDENTIALS, LOGIN_ERROR, REGISTRATION_ERROR, USER_EXISTS } from '@/constants/errors';
+import { INVALID_CREDENTIALS, USER_EXISTS } from '@/constants/errors';
 
 export default class AuthService {
   private readonly userRepository: UserRepository;
@@ -34,8 +34,7 @@ export default class AuthService {
 
       return this.userRepository.createUser(newUser);
     } catch (error) {
-      this.handleError(error);
-      throw new AuthError(REGISTRATION_ERROR.code, REGISTRATION_ERROR.message, REGISTRATION_ERROR.statusCode);
+      throw error;
     }
   }
 
@@ -61,8 +60,7 @@ export default class AuthService {
         },
       };
     } catch (error) {
-      this.handleError(error);
-      throw new AuthError(LOGIN_ERROR.code, LOGIN_ERROR.message, LOGIN_ERROR.statusCode);
+      throw error;
     }
   }
 
@@ -76,11 +74,5 @@ export default class AuthService {
 
   private generateToken(userId: string, email: string): string {
     return jwt.sign({ userId, email }, config.JWT_SECRET, { expiresIn: '15m' });
-  }
-
-  private handleError(error: unknown): void {
-    if (error instanceof AuthError) {
-      throw error;
-    }
   }
 }

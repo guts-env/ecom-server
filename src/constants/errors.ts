@@ -16,16 +16,10 @@ export const INVALID_TOKEN = {
   statusCode: 401,
 };
 
-export const LOGIN_ERROR = {
-  code: 'LOGIN_ERROR',
-  message: 'Failed to login',
-  statusCode: 500,
-};
-
-export const REGISTRATION_ERROR = {
-  code: 'REGISTRATION_ERROR',
-  message: 'Failed to register user',
-  statusCode: 500,
+export const RATE_LIMIT_EXCEEDED = {
+  code: 'RATE_LIMIT_EXCEEDED',
+  message: 'Too many requests, please try again later',
+  statusCode: 429,
 };
 
 export const TOKEN_EXPIRED = {

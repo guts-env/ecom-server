@@ -37,6 +37,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
         message: INVALID_TOKEN.message,
         code: INVALID_TOKEN.code,
       });
+      return;
     }
 
     req.user = {
