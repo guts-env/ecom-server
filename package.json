@@ -12,7 +12,8 @@
     "test:coverage": "jest --coverage",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
-    "postbuild": "cp .env dist/ 2>/dev/null || true"
+    "postbuild": "cp .env dist/ 2>/dev/null || true",
+    "prepare": "husky"
   },
   "license": "MIT",
   "dependencies": {
@@ -24,6 +25,7 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.1.0",
     "helmet": "^8.1.0",
+    "husky": "^9.1.7",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
     "uuid": "^13.0.0",
