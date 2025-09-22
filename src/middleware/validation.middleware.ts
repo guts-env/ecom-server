@@ -38,3 +38,79 @@ export const validate = (schema: z.ZodSchema) => {
     }
   };
 };
+
+export const validateQuery = (schema: z.ZodSchema) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const validatedData = schema.parse(req.query);
+      Object.assign(req.query, validatedData);
+      next();
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errorMessages = error.issues.map((issue) => ({
+          field: issue.path.join('.'),
+          message: issue.message,
+        }));
+
+        res.status(400).json({
+          success: false,
+          message: 'Validation error',
+          errors: errorMessages,
+        });
+        return;
+      }
+
+      if (error instanceof Error) {
+        res.status(400).json({
+          success: false,
+          message: error.message,
+        });
+        return;
+      }
+
+      res.status(400).json({
+        success: false,
+        message: 'Validation error',
+      });
+      return;
+    }
+  };
+};
+
+export const validateParams = (schema: z.ZodSchema) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const validatedData = schema.parse(req.params);
+      Object.assign(req.params, validatedData);
+      next();
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errorMessages = error.issues.map((issue) => ({
+          field: issue.path.join('.'),
+          message: issue.message,
+        }));
+
+        res.status(400).json({
+          success: false,
+          message: 'Validation error',
+          errors: errorMessages,
+        });
+        return;
+      }
+
+      if (error instanceof Error) {
+        res.status(400).json({
+          success: false,
+          message: error.message,
+        });
+        return;
+      }
+
+      res.status(400).json({
+        success: false,
+        message: 'Validation error',
+      });
+      return;
+    }
+  };
+};

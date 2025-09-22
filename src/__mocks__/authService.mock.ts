@@ -1,8 +1,8 @@
-export const mockRegister = jest.fn().mockImplementation((...args) => {
+export const mockRegister = jest.fn().mockImplementation(() => {
   return Promise.resolve(undefined);
 });
 
-export const mockLogin = jest.fn().mockImplementation((...args) => {
+export const mockLogin = jest.fn().mockImplementation(() => {
   return Promise.resolve({});
 });
 
