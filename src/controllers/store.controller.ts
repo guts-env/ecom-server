@@ -27,6 +27,15 @@ export class StoreController extends BaseController {
       }
     }
   };
+
+  getStoreById = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const response = await this.storeService.getStoreById(req.params.id!);
+      res.status(200).send(response);
+    } catch (error) {
+      this.handleError(res, error, 'Failed to get store by id');
+    }
+  };
 }
 
 export default new StoreController();

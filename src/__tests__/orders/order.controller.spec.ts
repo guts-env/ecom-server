@@ -62,7 +62,6 @@ describe('OrderController', () => {
     mockServiceInstance = {
       createOrder: jest.fn(),
       getOrdersByUserId: jest.fn(),
-      getOrderById: jest.fn(),
     } as unknown as jest.Mocked<OrderService>;
 
     mockOrderService.mockImplementation(() => mockServiceInstance);
@@ -73,7 +72,6 @@ describe('OrderController', () => {
     app.use(express.json());
     app.post('/orders', orderController.createOrder);
     app.get('/orders/user/:userId', orderController.getOrdersByUserId);
-    app.get('/orders/:id', orderController.getOrderById);
   });
 
   describe('POST /orders', () => {
@@ -197,35 +195,4 @@ describe('OrderController', () => {
     });
   });
 
-  describe('GET /orders/:id', () => {
-    it('should return order when found', async () => {
-      const expectedOrder = mockOrders[0];
-      mockServiceInstance.getOrderById.mockResolvedValue(expectedOrder!);
-
-      const response = await request(app).get('/orders/1').expect(200);
-
-      expect(response.body).toEqual({
-        success: true,
-        data: expectedOrder,
-      });
-      expect(mockServiceInstance.getOrderById).toHaveBeenCalledWith('1');
-    });
-
-    it('should return 404 when order not found', async () => {
-      mockServiceInstance.getOrderById.mockResolvedValue(null);
-
-      const response = await request(app).get('/orders/999').expect(404);
-
-      expect(response.body).toEqual({
-        success: false,
-        message: 'Order not found',
-      });
-    });
-
-    it('should handle service error', async () => {
-      mockServiceInstance.getOrderById.mockRejectedValue(new Error('Service error'));
-
-      await request(app).get('/orders/1').expect(500);
-    });
-  });
 });

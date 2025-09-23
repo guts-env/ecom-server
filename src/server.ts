@@ -39,7 +39,7 @@ if (process.env.NODE_ENV !== 'test') {
       logger.error('Failed to initialize stores', { error });
     });
 
-  const productService = new ProductService();
+  const productService = ProductService.getInstance();
   productService
     .initializeProducts()
     .then(() => {

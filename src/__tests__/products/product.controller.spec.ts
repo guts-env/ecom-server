@@ -6,8 +6,6 @@ import type { IProduct } from '@/entities';
 
 jest.mock('@/services/product.service');
 
-const mockProductService = ProductService as jest.MockedClass<typeof ProductService>;
-
 describe('ProductController', () => {
   let app: express.Application;
   let productController: ProductController;
@@ -58,11 +56,15 @@ describe('ProductController', () => {
       getProductById: jest.fn(),
       getProductsByStoreId: jest.fn(),
       getProductsByCategory: jest.fn(),
+      getFilteredProducts: jest.fn(),
       initializeProducts: jest.fn(),
       clearCache: jest.fn(),
+      validateStock: jest.fn(),
+      reduceStock: jest.fn(),
+      updateStock: jest.fn(),
     } as unknown as jest.Mocked<ProductService>;
 
-    mockProductService.mockImplementation(() => mockServiceInstance);
+    (ProductService.getInstance as jest.Mock).mockReturnValue(mockServiceInstance);
 
     productController = new ProductController();
 
@@ -75,7 +77,13 @@ describe('ProductController', () => {
 
   describe('GET /products', () => {
     it('should return all products with pagination', async () => {
-      mockServiceInstance.getAllProducts.mockResolvedValue(mockProducts);
+      mockServiceInstance.getFilteredProducts.mockResolvedValue({
+        products: mockProducts,
+        totalCount: 3,
+        limit: 10,
+        offset: 0,
+        hasMore: false,
+      });
 
       const response = await request(app).get('/products').expect(200);
 
@@ -87,33 +95,52 @@ describe('ProductController', () => {
         offset: 0,
         hasMore: false,
       });
-      expect(mockServiceInstance.getAllProducts).toHaveBeenCalled();
+      expect(mockServiceInstance.getFilteredProducts).toHaveBeenCalled();
     });
 
     it('should filter products by store_id', async () => {
       const storeProducts = mockProducts.filter((p) => p.store_id === '1');
-      mockServiceInstance.getProductsByStoreId.mockResolvedValue(storeProducts);
+      mockServiceInstance.getFilteredProducts.mockResolvedValue({
+        products: storeProducts,
+        totalCount: 2,
+        limit: 10,
+        offset: 0,
+        hasMore: false,
+      });
 
       const response = await request(app).get('/products?store_id=1').expect(200);
 
       expect(response.body.data).toEqual(storeProducts);
       expect(response.body.count).toBe(2);
-      expect(mockServiceInstance.getProductsByStoreId).toHaveBeenCalledWith('1');
+      expect(mockServiceInstance.getFilteredProducts).toHaveBeenCalledWith({ store_id: '1' });
     });
 
     it('should filter products by category', async () => {
       const categoryProducts = mockProducts.filter((p) => p.category === 'Smartphones');
-      mockServiceInstance.getProductsByCategory.mockResolvedValue(categoryProducts);
+      mockServiceInstance.getFilteredProducts.mockResolvedValue({
+        products: categoryProducts,
+        totalCount: 2,
+        limit: 10,
+        offset: 0,
+        hasMore: false,
+      });
 
       const response = await request(app).get('/products?category=Smartphones').expect(200);
 
       expect(response.body.data).toEqual(categoryProducts);
       expect(response.body.count).toBe(2);
-      expect(mockServiceInstance.getProductsByCategory).toHaveBeenCalledWith('Smartphones');
+      expect(mockServiceInstance.getFilteredProducts).toHaveBeenCalledWith({ category: 'Smartphones' });
     });
 
     it('should filter products by search term', async () => {
-      mockServiceInstance.getAllProducts.mockResolvedValue(mockProducts);
+      const searchResults = mockProducts.filter((p) => p.name.includes('iPhone'));
+      mockServiceInstance.getFilteredProducts.mockResolvedValue({
+        products: searchResults,
+        totalCount: 1,
+        limit: 10,
+        offset: 0,
+        hasMore: false,
+      });
 
       const response = await request(app).get('/products?search=iPhone').expect(200);
 
@@ -122,7 +149,14 @@ describe('ProductController', () => {
     });
 
     it('should filter products by brand', async () => {
-      mockServiceInstance.getAllProducts.mockResolvedValue(mockProducts);
+      const brandProducts = mockProducts.filter((p) => p.brand === 'Apple');
+      mockServiceInstance.getFilteredProducts.mockResolvedValue({
+        products: brandProducts,
+        totalCount: 2,
+        limit: 10,
+        offset: 0,
+        hasMore: false,
+      });
 
       const response = await request(app).get('/products?brand=Apple').expect(200);
 
@@ -131,7 +165,14 @@ describe('ProductController', () => {
     });
 
     it('should filter products by price range', async () => {
-      mockServiceInstance.getAllProducts.mockResolvedValue(mockProducts);
+      const priceRangeProducts = mockProducts.filter((p) => p.price >= 900 && p.price <= 1000);
+      mockServiceInstance.getFilteredProducts.mockResolvedValue({
+        products: priceRangeProducts,
+        totalCount: 1,
+        limit: 10,
+        offset: 0,
+        hasMore: false,
+      });
 
       const response = await request(app).get('/products?min_price=900&max_price=1000').expect(200);
 
@@ -140,7 +181,14 @@ describe('ProductController', () => {
     });
 
     it('should handle pagination with limit and offset', async () => {
-      mockServiceInstance.getAllProducts.mockResolvedValue(mockProducts);
+      const paginatedProducts = mockProducts.slice(1, 3);
+      mockServiceInstance.getFilteredProducts.mockResolvedValue({
+        products: paginatedProducts,
+        totalCount: 3,
+        limit: 2,
+        offset: 1,
+        hasMore: false,
+      });
 
       const response = await request(app).get('/products?limit=2&offset=1').expect(200);
 
@@ -151,7 +199,14 @@ describe('ProductController', () => {
     });
 
     it('should return hasMore true when there are more products', async () => {
-      mockServiceInstance.getAllProducts.mockResolvedValue(mockProducts);
+      const paginatedProducts = mockProducts.slice(0, 2);
+      mockServiceInstance.getFilteredProducts.mockResolvedValue({
+        products: paginatedProducts,
+        totalCount: 3,
+        limit: 2,
+        offset: 0,
+        hasMore: true,
+      });
 
       const response = await request(app).get('/products?limit=2&offset=0').expect(200);
 
@@ -159,7 +214,7 @@ describe('ProductController', () => {
     });
 
     it('should handle service error', async () => {
-      mockServiceInstance.getAllProducts.mockRejectedValue(new Error('Service error'));
+      mockServiceInstance.getFilteredProducts.mockRejectedValue(new Error('Service error'));
 
       await request(app).get('/products').expect(500);
     });

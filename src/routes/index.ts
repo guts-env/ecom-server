@@ -9,6 +9,6 @@ const appRoutes = Router();
 appRoutes.use('/orders', orderRoutes);
 appRoutes.use('/products', productRoutes);
 appRoutes.use('/stores', storeRoutes);
-appRoutes.use('/users', userRoutes);
+appRoutes.use('/auth', userRoutes);
 
 export default appRoutes;

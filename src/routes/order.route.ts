@@ -2,7 +2,7 @@ import { Router } from 'express';
 import orderController from '@/controllers/order.controller';
 import { defaultLimiter } from '@/middleware/rateLimiter.middleware';
 import { validate, validateParams } from '@/middleware/validation.middleware';
-import { CreateOrderSchema, GetOrderByIdParamsSchema, GetOrdersByUserParamsSchema } from '@/dto/order.dto';
+import { CreateOrderSchema, GetOrdersByUserParamsSchema } from '@/dto/order.dto';
 
 const orderRoutes = Router();
 
@@ -13,6 +13,5 @@ orderRoutes.get(
   validateParams(GetOrdersByUserParamsSchema),
   orderController.getOrdersByUserId
 );
-orderRoutes.get('/:id', defaultLimiter, validateParams(GetOrderByIdParamsSchema), orderController.getOrderById);
 
 export default orderRoutes;

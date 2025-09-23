@@ -1,15 +1,24 @@
 import type { IProduct } from '@/entities';
 import ProductRepository from '@/repositories/product.repository';
 import { mockProducts } from '@/data/mockProducts';
+import type { GetProductsQueryDTO } from '@/dto/product.dto';
 
 export default class ProductService {
+  private static instance: ProductService;
   private productRepository: ProductRepository;
   private initialized = false;
   private cache: Map<string, any> = new Map();
   private readonly cacheDuration = 15 * 60 * 1000;
 
-  constructor() {
+  private constructor() {
     this.productRepository = new ProductRepository();
+  }
+
+  static getInstance(): ProductService {
+    if (!ProductService.instance) {
+      ProductService.instance = new ProductService();
+    }
+    return ProductService.instance;
   }
 
   async initializeProducts(): Promise<void> {
@@ -105,5 +114,60 @@ export default class ProductService {
 
   clearCache(): void {
     this.cache.clear();
+  }
+
+  async validateStock(productId: string, quantity: number): Promise<boolean> {
+    if (!this.initialized) {
+      await this.initializeProducts();
+    }
+
+    return this.productRepository.checkStockAvailability(productId, quantity);
+  }
+
+  async reduceStock(productId: string, quantity: number): Promise<boolean> {
+    if (!this.initialized) {
+      await this.initializeProducts();
+    }
+
+    const success = this.productRepository.reduceProductStock(productId, quantity);
+
+    if (success) {
+      this.clearCache();
+    }
+
+    return success;
+  }
+
+  async updateStock(productId: string, newStock: number): Promise<boolean> {
+    if (!this.initialized) {
+      await this.initializeProducts();
+    }
+
+    const success = this.productRepository.updateProductStock(productId, newStock);
+
+    if (success) {
+      this.clearCache();
+    }
+
+    return success;
+  }
+
+  async getFilteredProducts(filters: GetProductsQueryDTO): Promise<{ products: IProduct[]; totalCount: number; limit: number; offset: number; hasMore: boolean }> {
+    if (!this.initialized) {
+      await this.initializeProducts();
+    }
+
+    const limitNumber = filters.limit ? parseInt(filters.limit) : 10;
+    const offsetNumber = filters.offset ? parseInt(filters.offset) : 0;
+
+    const result = this.productRepository.getFilteredProducts(filters);
+
+    return {
+      products: result.products,
+      totalCount: result.totalCount,
+      limit: limitNumber,
+      offset: offsetNumber,
+      hasMore: offsetNumber + limitNumber < result.totalCount,
+    };
   }
 }

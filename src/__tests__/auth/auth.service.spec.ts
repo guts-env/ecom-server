@@ -109,7 +109,7 @@ describe('AuthService Unit Tests', () => {
           email: 'john@example.com',
         },
         'test-secret',
-        { expiresIn: '15m' }
+        { expiresIn: '24h' }
       );
       expect(result).toEqual({
         success: true,
@@ -176,7 +176,7 @@ describe('AuthService Unit Tests', () => {
           email: 'john@example.com',
         },
         'test-secret',
-        { expiresIn: '15m' }
+        { expiresIn: '24h' }
       );
     });
   });
@@ -241,7 +241,7 @@ describe('AuthService Unit Tests', () => {
           email: 'test@example.com',
         },
         'test-secret',
-        { expiresIn: '15m' }
+        { expiresIn: '24h' }
       );
       expect(result.data?.token).toBe('generated-token');
     });
@@ -283,7 +283,7 @@ describe('AuthService Unit Tests', () => {
         password: 'password',
       });
 
-      expect(mockJwt.sign).toHaveBeenCalledWith(expect.any(Object), expect.any(String), { expiresIn: '15m' });
+      expect(mockJwt.sign).toHaveBeenCalledWith(expect.any(Object), expect.any(String), { expiresIn: '24h' });
     });
   });
 });

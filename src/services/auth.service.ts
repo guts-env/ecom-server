@@ -73,6 +73,10 @@ export default class AuthService {
   }
 
   private generateToken(userId: string, email: string): string {
-    return jwt.sign({ userId, email }, config.JWT_SECRET, { expiresIn: '15m' });
+    /* 
+    set expiration time to 24 hours here for demo purposes, in production environments this should have a shorter life span
+    which can be refreshed by using httponly cookies and refresh tokens for security
+    */
+    return jwt.sign({ userId, email }, config.JWT_SECRET, { expiresIn: '24h' });
   }
 }

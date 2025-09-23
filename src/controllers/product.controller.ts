@@ -7,58 +7,21 @@ export class ProductController extends BaseController {
 
   constructor() {
     super();
-    this.productService = new ProductService();
+    this.productService = ProductService.getInstance();
   }
 
   getAllProducts = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { category, store_id, search, min_price, max_price, brand, limit = '10', offset = '0' } = req.query;
-
-      const limitNumber = parseInt(limit as string);
-      const offsetNumber = parseInt(offset as string);
-
-      let products;
-
-      if (store_id) {
-        products = await this.productService.getProductsByStoreId(store_id as string);
-      } else if (category) {
-        products = await this.productService.getProductsByCategory(category as string);
-      } else {
-        products = await this.productService.getAllProducts();
-      }
-
-      if (search) {
-        const searchTerm = (search as string).toLowerCase();
-        products = products.filter(
-          (product) =>
-            product.name.toLowerCase().includes(searchTerm) || product.description.toLowerCase().includes(searchTerm)
-        );
-      }
-
-      if (brand) {
-        products = products.filter((product) => product.brand.toLowerCase() === (brand as string).toLowerCase());
-      }
-
-      if (min_price) {
-        const minPrice = parseFloat(min_price as string);
-        products = products.filter((product) => product.price >= minPrice);
-      }
-
-      if (max_price) {
-        const maxPrice = parseFloat(max_price as string);
-        products = products.filter((product) => product.price <= maxPrice);
-      }
-
-      const totalCount = products.length;
-      const paginatedProducts = products.slice(offsetNumber, offsetNumber + limitNumber);
+      const filters = req.query;
+      const result = await this.productService.getFilteredProducts(filters);
 
       res.status(200).json({
         success: true,
-        data: paginatedProducts,
-        count: totalCount,
-        limit: limitNumber,
-        offset: offsetNumber,
-        hasMore: offsetNumber + limitNumber < totalCount,
+        data: result.products,
+        count: result.totalCount,
+        limit: result.limit,
+        offset: result.offset,
+        hasMore: result.hasMore,
       });
     } catch (error) {
       this.handleError(res, error, 'Failed to get products');

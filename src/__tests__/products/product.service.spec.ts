@@ -70,11 +70,16 @@ describe('ProductService', () => {
       getProductsByStoreId: jest.fn(),
       getProductsByCategory: jest.fn(),
       getProductsByBrand: jest.fn(),
+      updateProductStock: jest.fn(),
+      reduceProductStock: jest.fn(),
+      checkStockAvailability: jest.fn(),
+      getFilteredProducts: jest.fn(),
     } as unknown as jest.Mocked<ProductRepository>;
 
     mockProductRepository.mockImplementation(() => mockRepositoryInstance);
 
-    productService = new ProductService();
+    (ProductService as any).instance = undefined;
+    productService = ProductService.getInstance();
   });
 
   describe('initializeProducts', () => {

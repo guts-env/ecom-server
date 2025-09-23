@@ -26,6 +26,14 @@ export class OrderController extends BaseController {
         data: order,
       });
     } catch (error) {
+      if (error instanceof Error && (error.message.includes('Insufficient stock') || error.message.includes('Failed to reduce stock'))) {
+        res.status(400).json({
+          success: false,
+          message: error.message,
+        });
+        return;
+      }
+
       this.handleError(res, error, 'Failed to create order');
     }
   };
@@ -44,29 +52,6 @@ export class OrderController extends BaseController {
       });
     } catch (error) {
       this.handleError(res, error, 'Failed to get orders by user');
-    }
-  };
-
-  getOrderById = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-
-      const order = await this.orderService.getOrderById(id!);
-
-      if (!order) {
-        res.status(404).json({
-          success: false,
-          message: 'Order not found',
-        });
-        return;
-      }
-
-      res.status(200).json({
-        success: true,
-        data: order,
-      });
-    } catch (error) {
-      this.handleError(res, error, 'Failed to get order');
     }
   };
 }

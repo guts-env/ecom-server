@@ -34,4 +34,11 @@ export default class StoreService {
 
     return this.storeRepository.getAllStores();
   }
+
+  async getStoreById(id: string): Promise<IStore | null> {
+    if (!this.initialized) {
+      await this.initializeStores();
+    }
+    return this.storeRepository.getStoreById(id);
+  }
 }

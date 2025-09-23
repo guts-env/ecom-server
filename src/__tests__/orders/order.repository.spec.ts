@@ -102,24 +102,4 @@ describe('OrderRepository', () => {
     });
   });
 
-  describe('getOrderById', () => {
-    beforeEach(() => {
-      mockOrders.forEach((order) => orderRepository.createOrder(order));
-    });
-
-    it('should return order when found', () => {
-      const result = orderRepository.getOrderById('1');
-      expect(result).toEqual(mockOrders[0]);
-    });
-
-    it('should return null when order not found', () => {
-      const result = orderRepository.getOrderById('999');
-      expect(result).toBeNull();
-    });
-
-    it('should return null for empty id', () => {
-      const result = orderRepository.getOrderById('');
-      expect(result).toBeNull();
-    });
-  });
 });

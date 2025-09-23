@@ -10,4 +10,8 @@ export default class StoreRepository {
   getAllStores(): IStore[] {
     return this.stores;
   }
+
+  getStoreById(id: string): IStore | null {
+    return this.stores.find((store) => store.id === id) || null;
+  }
 }
